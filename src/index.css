@@ -1,0 +1,39 @@
+/* Основные стили */
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background: #f5f7fa; /* Светло-серый фон */
+  color: #2b2b2b; /* Тёмный текст */
+}
+
+/* Логотип и заголовки */
+.brand {
+  font-weight: bold;
+  font-size: 22px;
+  color: #1890ff; /* Голубой акцент */
+}
+
+/* Ссылки и навигация */
+a {
+  text-decoration: none;
+  color: #1890ff; /* Голубой акцент */
+}
+
+a:hover {
+  color: #722ed1; /* Фиолетовый при наведении */
+}
+
+/* Мобильная кнопка меню */
+.mobile-menu-btn {
+  display: none;
+}
+
+/* Показываем кнопку на экранах менее 768px */
+@media (max-width: 768px) {
+  .ant-menu-horizontal {
+    display: none;
+  }
+  .mobile-menu-btn {
+    display: inline-block;
+  }
+}

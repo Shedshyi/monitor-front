@@ -1,0 +1,25 @@
+/* ContactsPage.css */
+
+.ant-card {
+    border-radius: 8px;
+  }
+  
+  .ant-card-body {
+    font-size: 16px;
+    color: #555;
+  }
+  
+  .ant-card-title {
+    font-size: 24px;
+    color: #333;
+  }
+  
+  .ant-card .anticon {
+    font-size: 18px;
+  }
+  
+  iframe {
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
