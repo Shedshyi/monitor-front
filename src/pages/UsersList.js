@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Typography, Spin, Input, Card, Tag } from 'antd';
+import { Table, Typography, Spin, Input, Card } from 'antd';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 
@@ -10,7 +10,6 @@ const UsersList = () => {
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [achievements, setAchievements] = useState({});
 
   const fetchUsers = async () => {
     try {
@@ -24,22 +23,8 @@ const UsersList = () => {
     }
   };
 
-  const fetchAchievements = async () => {
-    try {
-      const response = await axios.get('https://monitor-mmlp.onrender.com/api/achievements/');
-      const achievementMap = response.data.reduce((acc, achievement) => {
-        acc[achievement.user_id] = achievement.titles;
-        return acc;
-      }, {});
-      setAchievements(achievementMap);
-    } catch (error) {
-      console.error('Ошибка при загрузке достижений:', error);
-    }
-  };
-
   useEffect(() => {
     fetchUsers();
-    fetchAchievements();
   }, []);
 
   // Обработчик поиска
@@ -73,17 +58,6 @@ const UsersList = () => {
       dataIndex: 'total_score',
       key: 'total_score',
       sorter: (a, b) => b.total_score - a.total_score,
-    },
-    {
-      title: 'Достижения',
-      key: 'achievements',
-      render: (_, record) => (
-        <>{
-          (achievements[record.id] || []).map((title, index) => (
-            <Tag color="gold" key={index}>{title}</Tag>
-          ))
-        }</>
-      ),
     },
   ];
 

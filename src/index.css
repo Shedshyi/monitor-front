@@ -37,3 +37,40 @@ a:hover {
     display: inline-block;
   }
 }
+
+/* Общие стили для всех экранов */
+.desktop-menu .ant-menu-item {
+  color: #ffffff;
+}
+
+/* Мобильное меню */
+@media (max-width: 768px) {
+  .desktop-menu {
+    display: none; /* Скрываем меню на мобильных устройствах */
+  }
+
+  .mobile-menu-btn {
+    display: block; /* Показываем кнопку меню на мобильных */
+  }
+
+  .mobile-menu-btn .anticon {
+    font-size: 24px;
+  }
+
+  .ant-drawer .ant-drawer-body {
+    padding: 0;
+  }
+}
+
+/* Десктопное меню */
+@media (min-width: 769px) {
+  .mobile-menu-btn {
+    display: none; /* Скрываем кнопку меню на десктопах */
+  }
+
+  .desktop-menu {
+    display: block; /* Показываем меню на десктопах */
+  }
+}
+
+

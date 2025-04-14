@@ -1,0 +1,31 @@
+/* Это файл CSS (например, Home.css) */
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    flex-wrap: wrap;  /* Это заставит элементы переходить на новую строку на маленьких экранах */
+  }
+  
+  .text-container {
+    max-width: 600px;
+  }
+  
+  .qr-container img {
+    width: 250px;
+    height: 250px;
+    /* Чтобы картинка не была слишком большой */
+  }
+  
+  @media screen and (max-width: 768px) {
+    .header-container {
+      flex-direction: column;  /* На маленьких экранах элементы будут выстраиваться по вертикали */
+      align-items: center;     /* Центрируем содержимое по горизонтали */
+    }
+  
+    .qr-container img {
+      width: 200px;  /* Уменьшаем размер изображения на мобильных */
+      height: 200px;
+    }
+  }
+  

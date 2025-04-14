@@ -17,7 +17,9 @@ const Header = () => {
   const items = [
     { key: '/score-system', label: '📊 Разбалловка' },
     { key: '/about', label: 'ℹ️ О нас' },
-    { key: '/achievements', label : 'Фильтрация'},
+    { key: '/achievements', label: '🗂️ Фильтр' },
+    { key: '/dashboard', label: '📈 Дашборд' },
+    { key: '/users', label: '👥 Учителя' },
   ];
 
   // Проверяем, есть ли пользователь при загрузке компонента
@@ -61,33 +63,37 @@ const Header = () => {
         🖥️ Monitoring System
       </div>
 
-      {/* Меню */}
-      <Menu
-        mode="horizontal"
-        selectedKeys={[location.pathname]}
-        style={{
-          flex: 1,
-          justifyContent: 'flex-end',
-          borderBottom: 'none',
-          background: 'transparent',
-          color: '#ffffff',
-        }}
-      >
-        {items.map((item) => (
-          <Menu.Item key={item.key}>
-            <Link to={item.key} style={{ color: '#ffffff' }}>
-              {item.label}
-            </Link>
-          </Menu.Item>
-        ))}
+      {/* Меню на десктопе */}
+      <div className="desktop-menu">
+        <Menu
+          mode="horizontal"
+          selectedKeys={[location.pathname]}
+          style={{
+            flex: 1,
+            justifyContent: 'flex-end',
+            borderBottom: 'none',
+            background: 'transparent',
+            color: '#ffffff',
+          }}
+        >
+          {items.map((item) => (
+            <Menu.Item key={item.key}>
+              <Link to={item.key} style={{ color: '#ffffff' }}>
+                {item.label}
+              </Link>
+            </Menu.Item>
+          ))}
 
-        {/* Если пользователь не авторизован — показываем "Войти" */}
-        {!user && (
-          <Menu.Item key="/login">
-            <Link to="/login" style={{ color: '#ffffff' }}>🔐 Войти</Link>
-          </Menu.Item>
-        )}
-      </Menu>
+          {/* Если пользователь не авторизован — показываем "Войти" */}
+          {!user && (
+            <Menu.Item key="/login">
+              <Link to="/login" style={{ color: '#ffffff' }}>
+                🔐 Войти
+              </Link>
+            </Menu.Item>
+          )}
+        </Menu>
+      </div>
 
       {/* Мобильное меню */}
       <Button
@@ -103,6 +109,7 @@ const Header = () => {
         placement="right"
         onClose={() => setVisible(false)}
         open={visible}
+        width={250}
       >
         {items.map((item) => (
           <p key={item.key}>
@@ -113,7 +120,7 @@ const Header = () => {
         ))}
 
         {/* Если пользователь авторизован — показываем имя и "Выйти" */}
-        {user && (
+        {user ? (
           <>
             <p>
               <Text strong>👤 {user.username}</Text>
@@ -122,29 +129,28 @@ const Header = () => {
               Выйти
             </Button>
           </>
-        )}
-
-        {!user && (
+        ) : (
           <p>
-            <Link to="/auth" onClick={() => setVisible(false)}>
+            <Link to="/login" onClick={() => setVisible(false)}>
               🔐 Войти
             </Link>
           </p>
         )}
       </Drawer>
 
-      {/* Если пользователь авторизован — показываем имя и "Выйти" */}
-      {user && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <Link to="/profile" style={{ color: 'white', textDecoration: 'none' }}>
-            👤 {user.username}
-          </Link>
-          <Button type="primary" danger onClick={handleLogout}>
-            Выйти
-          </Button>
-        </div>
-      )}
-
+      {/* Если пользователь авторизован — показываем имя и "Выйти" для десктопа */}
+      <div className="desktop-user-info">
+        {user && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <Link to="/profile" style={{ color: 'white', textDecoration: 'none' }}>
+              👤 {user.username}
+            </Link>
+            <Button type="primary" danger onClick={handleLogout}>
+              Выйти
+            </Button>
+          </div>
+        )}
+      </div>
     </AntHeader>
   );
 };
