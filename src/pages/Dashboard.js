@@ -1,18 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, Typography, Select, Button, Input, List, Spin } from 'antd';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 
 const { Title } = Typography;
 const { Option } = Select;
 
 const Dashboard = () => {
+  const [data, setData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
+  const [directions, setDirections] = useState([]);
+  const [criteria, setCriteria] = useState([]);
   const [selectedDirection, setSelectedDirection] = useState('');
   const [selectedCriteria, setSelectedCriteria] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const directions = ['Программирование', 'Дизайн', 'Маркетинг', 'Менеджмент'];
-  const criteria = ['По имени', 'По баллам'];
+  useEffect(() => {
+    setLoading(true);
+    axios
+      .get('https://monitor-mmlp.onrender.com/api/best-teachers/')
+      .then((response) => {
+        setData(response.data);
+        setFilteredData(response.data);
+        
+        // Сбор уникальных направлений и критериев с бэка
+        const allDirections = [];
+        const allCriteria = [];
+        
+        response.data.forEach(item => {
+          item.directions.forEach(direction => {
+            if (!allDirections.includes(direction.direction_title)) {
+              allDirections.push(direction.direction_title);
+            }
+            direction.criteria.forEach(criterion => {
+              if (!allCriteria.includes(criterion.criteria_title)) {
+                allCriteria.push(criterion.criteria_title);
+              }
+            });
+          });
+        });
+
+        setDirections(allDirections);
+        setCriteria(allCriteria);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Ошибка загрузки данных:", error);
+        setLoading(false);
+      });
+  }, []);
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -27,29 +64,36 @@ const Dashboard = () => {
   };
 
   const filterData = () => {
-    // Имитация фильтрации данных
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      // Пример фильтрации данных (можно заменить на реальную логику)
-    }, 1000);
+    let filtered = data;
+
+    if (selectedDirection) {
+      filtered = filtered.filter((item) =>
+        item.directions.some(
+          (direction) => direction.direction_title === selectedDirection
+        )
+      );
+    }
+
+    if (selectedCriteria) {
+      filtered = filtered.filter((item) =>
+        item.directions.some((direction) =>
+          direction.criteria.some(
+            (criteria) => criteria.criteria_title === selectedCriteria
+          )
+        )
+      );
+    }
+
+    if (searchTerm) {
+      filtered = filtered.filter((item) =>
+        item.username.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    setFilteredData(filtered);
+    setLoading(false);
   };
-
-  const data = [
-    { id: 1, name: 'Иван Иванов', score: 300, direction: 'Программирование' },
-    { id: 2, name: 'Мария Петрова', score: 500, direction: 'Дизайн' },
-    { id: 3, name: 'Александр Сидоров', score: 200, direction: 'Маркетинг' },
-    { id: 4, name: 'Ольга Смирнова', score: 350, direction: 'Менеджмент' },
-  ];
-
-  const filteredData = data.filter((item) => {
-    return (
-      (selectedDirection ? item.direction === selectedDirection : true) &&
-      (selectedCriteria === 'По баллам' ? item.score : item.name)
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase())
-    );
-  });
 
   return (
     <div style={{ padding: '20px' }}>
@@ -61,7 +105,7 @@ const Dashboard = () => {
           <Select
             value={selectedDirection}
             onChange={(value) => handleFilterChange('direction', value)}
-            style={{ width: 200 }}
+            style={{ width: 300 }}
           >
             {directions.map((direction) => (
               <Option key={direction} value={direction}>
@@ -76,7 +120,7 @@ const Dashboard = () => {
           <Select
             value={selectedCriteria}
             onChange={(value) => handleFilterChange('criteria', value)}
-            style={{ width: 200 }}
+            style={{ width: 300 }}
           >
             {criteria.map((criterion) => (
               <Option key={criterion} value={criterion}>
@@ -89,10 +133,10 @@ const Dashboard = () => {
         <div style={{ marginBottom: 10 }}>
           <strong>Поиск:</strong>{' '}
           <Input
-            placeholder="Поиск по имени или баллам"
+            placeholder="Поиск по имени"
             value={searchTerm}
             onChange={handleSearchChange}
-            style={{ width: 200 }}
+            style={{ width: 300 }}
           />
         </div>
 
@@ -112,8 +156,10 @@ const Dashboard = () => {
             renderItem={(item) => (
               <List.Item>
                 <List.Item.Meta
-                  title={<Link to={`/users/${item.id}`}>{item.name}</Link>}
-                  description={`Баллы: ${item.score}, Направление: ${item.direction}`}
+                  title={<Link to={`/users/${item.id}`}>{item.username}</Link>}
+                  description={`Направления: ${item.directions
+                    .map((direction) => direction.direction_title)
+                    .join(', ')}`}
                 />
               </List.Item>
             )}
