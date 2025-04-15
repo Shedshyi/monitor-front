@@ -9,6 +9,7 @@ import {
 } from 'antd';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+window.isNumber = (value) => typeof value === 'number' && !isNaN(value);
 import {
   LineChart,
   Line,
@@ -195,4 +196,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-  
