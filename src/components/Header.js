@@ -18,7 +18,7 @@ const Header = () => {
     { key: '/score-system', label: '📊 Разбалловка' },
     { key: '/about', label: 'ℹ️ О нас' },
     { key: '/achievements', label: '🗂️ Фильтр' },
-    { key: '/dashboard', label: '📈 Дашборд' },
+    { key: '/dashboard', label: '📈 Рейтинг' },
     { key: '/users', label: '👥 Учителя' },
   ];
 

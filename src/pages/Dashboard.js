@@ -1,171 +1,143 @@
-import React, { useState, useEffect } from 'react';
-import { Card, Typography, Select, Button, Input, List, Spin } from 'antd';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Select, Typography, Spin, Table } from 'antd';
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 const { Option } = Select;
 
 const Dashboard = () => {
-  const [data, setData] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
-  const [directions, setDirections] = useState([]);
-  const [criteria, setCriteria] = useState([]);
-  const [selectedDirection, setSelectedDirection] = useState('');
-  const [selectedCriteria, setSelectedCriteria] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [teachers, setTeachers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const [selectedDirection, setSelectedDirection] = useState(null);
+  const [selectedCriterion, setSelectedCriterion] = useState(null);
 
   useEffect(() => {
-    setLoading(true);
-    axios
-      .get('https://monitor-mmlp.onrender.com/api/best-teachers/')
-      .then((response) => {
-        setData(response.data);
-        setFilteredData(response.data);
-        
-        // Сбор уникальных направлений и критериев с бэка
-        const allDirections = [];
-        const allCriteria = [];
-        
-        response.data.forEach(item => {
-          item.directions.forEach(direction => {
-            if (!allDirections.includes(direction.direction_title)) {
-              allDirections.push(direction.direction_title);
-            }
-            direction.criteria.forEach(criterion => {
-              if (!allCriteria.includes(criterion.criteria_title)) {
-                allCriteria.push(criterion.criteria_title);
-              }
-            });
-          });
-        });
+    const fetchTeachers = async () => {
+      try {
+        const response = await axios.get('https://monitor-mmlp.onrender.com/api/best-teachers/');
+        setTeachers(response.data);
+      } catch (error) {
+        console.error('Ошибка при загрузке данных:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-        setDirections(allDirections);
-        setCriteria(allCriteria);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Ошибка загрузки данных:", error);
-        setLoading(false);
-      });
+    fetchTeachers();
   }, []);
 
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
-  };
+  // Список всех направлений и критериев
+  const allDirections = Array.from(new Set(
+    teachers.flatMap(t => t.directions.map(d => `${d.direction_id}|${d.direction_title}`))
+  ));
 
-  const handleFilterChange = (type, value) => {
-    if (type === 'direction') {
-      setSelectedDirection(value);
-    } else if (type === 'criteria') {
-      setSelectedCriteria(value);
-    }
-  };
+  const allCriteria = Array.from(new Set(
+    teachers.flatMap(t =>
+      t.directions.flatMap(d =>
+        d.criteria.map(c => `${c.criteria_id}|${c.criteria_title}`)
+      )
+    )
+  ));
 
-  const filterData = () => {
-    setLoading(true);
-    let filtered = data;
+  // Обработка таблицы
+  const dataSource = teachers.map(t => {
+    let directionScore = 0;
+    let criterionScore = 0;
 
-    if (selectedDirection) {
-      filtered = filtered.filter((item) =>
-        item.directions.some(
-          (direction) => direction.direction_title === selectedDirection
-        )
-      );
-    }
+    t.directions.forEach(d => {
+      if (selectedDirection && d.direction_id === parseInt(selectedDirection)) {
+        directionScore = d.total_score;
+      }
+      if (selectedCriterion) {
+        const crit = d.criteria.find(c => c.criteria_id === parseInt(selectedCriterion));
+        if (crit) {
+          criterionScore = crit.score;
+        }
+      }
+    });
 
-    if (selectedCriteria) {
-      filtered = filtered.filter((item) =>
-        item.directions.some((direction) =>
-          direction.criteria.some(
-            (criteria) => criteria.criteria_title === selectedCriteria
-          )
-        )
-      );
-    }
+    return {
+      key: t.id,
+      name: t.username,
+      directionScore,
+      criterionScore,
+    };
+  }).filter(t => {
+    // Показываем только тех, у кого есть хотя бы один балл
+    return (selectedDirection ? t.directionScore > 0 : true) &&
+           (selectedCriterion ? t.criterionScore > 0 : true);
+  }).sort((a, b) => {
+    // Сортировка по сумме выбранных баллов
+    const aScore = (selectedDirection ? a.directionScore : 0) + (selectedCriterion ? a.criterionScore : 0);
+    const bScore = (selectedDirection ? b.directionScore : 0) + (selectedCriterion ? b.criterionScore : 0);
+    return bScore - aScore;
+  });
 
-    if (searchTerm) {
-      filtered = filtered.filter((item) =>
-        item.username.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
+  const columns = [
+    {
+      title: 'Учитель',
+      dataIndex: 'name',
+      key: 'name',
+    },
+    selectedCriterion && {
+      title: 'Балл за критерий',
+      dataIndex: 'criterionScore',
+      key: 'criterionScore',
+    },
+    selectedDirection && {
+      title: 'Балл за направление',
+      dataIndex: 'directionScore',
+      key: 'directionScore',
+    },
+  ].filter(Boolean); // удаляем null если что-то не выбрано
 
-    setFilteredData(filtered);
-    setLoading(false);
-  };
+  if (loading) return <Spin size="large" />;
 
   return (
-    <div style={{ padding: '20px' }}>
-      <Title>Фильтр по направлениям и критериям</Title>
+    <div style={{ padding: 24 }}>
+      <Title level={3}>Рейтинг преподавателей</Title>
 
-      <Card style={{ marginBottom: 20 }}>
-        <div style={{ marginBottom: 10 }}>
-          <strong>Выберите направление:</strong>{' '}
-          <Select
-            value={selectedDirection}
-            onChange={(value) => handleFilterChange('direction', value)}
-            style={{ width: 300 }}
-          >
-            {directions.map((direction) => (
-              <Option key={direction} value={direction}>
-                {direction}
-              </Option>
-            ))}
-          </Select>
-        </div>
+      <div style={{ marginBottom: 20 }}>
+        <Text strong>Выбери направление:</Text>
+        <Select
+          style={{ width: 400, marginLeft: 10 }}
+          allowClear
+          placeholder="Направление"
+          onChange={(value) => {
+            setSelectedDirection(value);
+          }}
+        >
+          {allDirections.map(d => {
+            const [id, title] = d.split('|');
+            return <Option key={id} value={id}>{title}</Option>;
+          })}
+        </Select>
+      </div>
 
-        <div style={{ marginBottom: 10 }}>
-          <strong>Выберите критерий:</strong>{' '}
-          <Select
-            value={selectedCriteria}
-            onChange={(value) => handleFilterChange('criteria', value)}
-            style={{ width: 300 }}
-          >
-            {criteria.map((criterion) => (
-              <Option key={criterion} value={criterion}>
-                {criterion}
-              </Option>
-            ))}
-          </Select>
-        </div>
+      <div style={{ marginBottom: 20 }}>
+        <Text strong>Выбери критерий:</Text>
+        <Select
+          style={{ width: 400, marginLeft: 10 }}
+          allowClear
+          placeholder="Критерий"
+          onChange={(value) => {
+            setSelectedCriterion(value);
+          }}
+        >
+          {allCriteria.map(c => {
+            const [id, title] = c.split('|');
+            return <Option key={id} value={id}>{title}</Option>;
+          })}
+        </Select>
+      </div>
 
-        <div style={{ marginBottom: 10 }}>
-          <strong>Поиск:</strong>{' '}
-          <Input
-            placeholder="Поиск по имени"
-            value={searchTerm}
-            onChange={handleSearchChange}
-            style={{ width: 300 }}
-          />
-        </div>
-
-        <Button type="primary" onClick={filterData}>
-          Применить фильтры
-        </Button>
-      </Card>
-
-      {loading ? (
-        <Spin size="large" />
-      ) : (
-        <Card>
-          <Title level={4}>Результаты</Title>
-          <List
-            itemLayout="horizontal"
-            dataSource={filteredData}
-            renderItem={(item) => (
-              <List.Item>
-                <List.Item.Meta
-                  title={<Link to={`/users/${item.id}`}>{item.username}</Link>}
-                  description={`Направления: ${item.directions
-                    .map((direction) => direction.direction_title)
-                    .join(', ')}`}
-                />
-              </List.Item>
-            )}
-          />
-        </Card>
-      )}
+      <Table
+        columns={columns}
+        dataSource={dataSource}
+        pagination={false}
+        bordered
+      />
     </div>
   );
 };
