@@ -16,43 +16,42 @@ const Profile = () => {
     const fetchData = async () => {
       const accessToken = localStorage.getItem('accessToken');
       const storedUser = JSON.parse(localStorage.getItem('user'));
-  
+
       if (!accessToken || !storedUser) {
         navigate('/login');
         return;
       }
-  
+
       setUser(storedUser);
-  
+
       try {
         const response = await axios.get('https://monitor-mmlp.onrender.com/api/my-scores/', {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
         });
-  
+
         const rawData = response.data || [];
-        console.log('Raw data from API:', rawData);  // Логируем полученные данные
-  
-        // Трансформируем данные в нужный формат
+        console.log('Raw data from API:', rawData);
+
         const transformed = [];
         let total = 0;
-  
+
         rawData.forEach(direction => {
-          // Каждый элемент rawData уже содержит данные о направлении, критерии и показателе
           transformed.push({
             id: direction.id,
             direction_title: direction.direction_title,
             criteria_title: direction.criteria_title,
             indicator_title: direction.indicator_title,
             indicator_points: direction.points || 0,
+            description: direction.description || '', // 👈 добавил описание
           });
-  
-          total += direction.points || 0;  // Добавляем баллы
+
+          total += direction.points || 0;
         });
-  
-        console.log('Transformed data:', transformed);  // Логируем преобразованные данные
-  
+
+        console.log('Transformed data:', transformed);
+
         setScores(transformed);
         setTotalPoints(total);
       } catch (error) {
@@ -64,7 +63,7 @@ const Profile = () => {
         setLoading(false);
       }
     };
-  
+
     fetchData();
   }, [navigate]);
 
@@ -85,6 +84,11 @@ const Profile = () => {
       title: 'Показатель',
       dataIndex: 'indicator_title',
       key: 'indicator_title',
+    },
+    {
+      title: 'Описание',
+      dataIndex: 'description',
+      key: 'description',
     },
     {
       title: 'Баллы',

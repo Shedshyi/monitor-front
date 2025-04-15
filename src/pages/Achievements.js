@@ -12,7 +12,6 @@ const Achievements = () => {
   const [directions, setDirections] = useState([]);
   const [criteria, setCriteria] = useState([]);
   const [indicators, setIndicators] = useState([]);
-  const [indicatorScore, setIndicatorScore] = useState(null);
 
   const [selectedDirection, setSelectedDirection] = useState(null);
   const [selectedCriteria, setSelectedCriteria] = useState(null);
@@ -42,7 +41,6 @@ const Achievements = () => {
       setSelectedCriteria(null);
       setIndicators([]);
       setSelectedIndicator(null);
-      setIndicatorScore(null);
     }
   }, [selectedDirection, directions]);
 
@@ -51,7 +49,6 @@ const Achievements = () => {
       const selectedCrit = criteria.find(crit => crit.id === selectedCriteria);
       setIndicators(selectedCrit ? selectedCrit.indicators : []);
       setSelectedIndicator(null);
-      setIndicatorScore(null);
     } else {
       setIndicators([]);
     }
@@ -59,17 +56,6 @@ const Achievements = () => {
 
   const handleIndicatorChange = (indicatorId) => {
     setSelectedIndicator(indicatorId);
-
-    if (indicatorId) {
-      const selectedInd = indicators.find(ind => ind.id === indicatorId);
-      if (selectedInd) {
-        setIndicatorScore(selectedInd.points);
-      } else {
-        setIndicatorScore(null);
-      }
-    } else {
-      setIndicatorScore(null);
-    }
   };
 
   const handleSubmit = async () => {
@@ -82,7 +68,6 @@ const Achievements = () => {
           indicator_id: selectedIndicator
         }
       });
-      console.log(response.data); // Логируем ответ от сервера для проверки
       setData(response.data);
       setLoading(false);
     } catch (error) {
@@ -90,11 +75,6 @@ const Achievements = () => {
       setLoading(false);
     }
   };
-
-  // Логируем данные перед рендером таблицы
-  useEffect(() => {
-    console.log('Data:', data); // Логируем данные перед рендером таблицы
-  }, [data]);
 
   const columns = [
     {
@@ -108,21 +88,6 @@ const Achievements = () => {
       dataIndex: 'total_score',
       key: 'total_score',
       sorter: (a, b) => b.total_score - a.total_score,
-    },
-    {
-      title: 'Баллы по направлению',
-      dataIndex: 'direction_score',
-      key: 'direction_score',
-    },
-    {
-      title: 'Баллы по критерию',
-      dataIndex: 'criteria_score',
-      key: 'criteria_score',
-    },
-    {
-      title: 'Баллы по показателю',
-      dataIndex: 'indicator_score',
-      key: 'indicator_score',
     }
   ];
 
@@ -171,13 +136,6 @@ const Achievements = () => {
             ))}
           </Select>
         </div>
-
-        {indicatorScore !== null && (
-          <div style={{ marginTop: 10 }}>
-            <span style={{ fontWeight: 'bold' }}>Баллы за выбранный показатель:</span>{' '}
-            <span style={{ fontSize: '18px', color: '#1890ff' }}>{indicatorScore} баллов</span>
-          </div>
-        )}
 
         <Button type="primary" onClick={handleSubmit} style={{ marginTop: 20 }}>
           Применить фильтры
