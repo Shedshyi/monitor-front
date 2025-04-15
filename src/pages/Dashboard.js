@@ -28,6 +28,9 @@ import {
 const { Title } = Typography;
 const { Option } = Select;
 
+// Определяем функцию isNumber
+const isNumber = (value) => typeof value === 'number' && !isNaN(value);
+
 const Dashboard = () => {
   const [topTeachers, setTopTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -84,6 +87,20 @@ const Dashboard = () => {
 
   if (loading) return <Spin size="large" />;
 
+  // Кастомный Tooltip для LineChart с проверкой isNumber
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      const value = payload[0].value;
+      return (
+        <div className="custom-tooltip">
+          <p>{label}</p>
+          <p>{isNumber(value) ? `Value: ${value}` : 'No valid number'}</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div style={{ padding: '20px' }}>
       <Title>🏆 Топ 10 Учителей</Title>
@@ -124,7 +141,7 @@ const Dashboard = () => {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="month" />
             <YAxis />
-            <Tooltip />
+            <Tooltip content={<CustomTooltip />} />
             <Legend />
             <Line type="monotone" dataKey="teacher1" stroke="#8884d8" name="Учитель 1" />
             <Line type="monotone" dataKey="teacher2" stroke="#82ca9d" name="Учитель 2" />

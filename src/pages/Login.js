@@ -20,7 +20,7 @@ const Login = () => {
       localStorage.setItem('user', JSON.stringify(user));
 
       message.success(`Добро пожаловать, ${user.username}!`);
-      navigate('/dashboard'); // Перенаправляем на панель после логина
+      navigate('/profile'); // Перенаправляем на панель после логина
       window.location.reload()
     } catch (error) {
       message.error('Ошибка авторизации. Проверьте данные.');
