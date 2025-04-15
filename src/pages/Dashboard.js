@@ -9,7 +9,6 @@ import {
 } from 'antd';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-window.isNumber = (value) => typeof value === 'number' && !isNaN(value);
 import {
   LineChart,
   Line,
@@ -28,9 +27,6 @@ import {
 
 const { Title } = Typography;
 const { Option } = Select;
-
-// Определяем функцию isNumber
-const isNumber = (value) => typeof value === 'number' && !isNaN(value);
 
 const Dashboard = () => {
   const [topTeachers, setTopTeachers] = useState([]);
@@ -52,7 +48,6 @@ const Dashboard = () => {
     fetchTopTeachers();
   }, []);
 
-  // 🔢 Моки для LineChart
   const activityData = [
     { month: 'Янв', teacher1: 400, teacher2: 300, teacher3: 200, teacher4: 250, teacher5: 180 },
     { month: 'Фев', teacher1: 420, teacher2: 320, teacher3: 220, teacher4: 280, teacher5: 190 },
@@ -61,7 +56,6 @@ const Dashboard = () => {
     { month: 'Май', teacher1: 490, teacher2: 350, teacher3: 300, teacher4: 340, teacher5: 240 },
   ];
 
-  // 📊 Моки для BarChart
   const weeklyData = [
     { day: 'Пн', score: 200 },
     { day: 'Вт', score: 300 },
@@ -72,7 +66,6 @@ const Dashboard = () => {
     { day: 'Вс', score: 150 },
   ];
 
-  // 🧁 Моки для PieChart
   const pieData = [
     { name: 'Учителя', value: 95 },
     { name: 'Админы', value: 5 },
@@ -88,14 +81,13 @@ const Dashboard = () => {
 
   if (loading) return <Spin size="large" />;
 
-  // Кастомный Tooltip для LineChart с проверкой isNumber
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       const value = payload[0].value;
       return (
         <div className="custom-tooltip">
           <p>{label}</p>
-          <p>{isNumber(value) ? `Value: ${value}` : 'No valid number'}</p>
+          <p>{typeof value === 'number' && !isNaN(value) ? `Value: ${value}` : 'No valid number'}</p>
         </div>
       );
     }
@@ -134,7 +126,6 @@ const Dashboard = () => {
         />
       </Card>
 
-      {/* 📈 График активности по месяцам */}
       <Card style={{ marginBottom: 20 }}>
         <Title level={4}>📈 Активность топ-5 по месяцам</Title>
         <ResponsiveContainer width="100%" height={300}>
@@ -153,7 +144,6 @@ const Dashboard = () => {
         </ResponsiveContainer>
       </Card>
 
-      {/* 📊 Бар график по дням недели */}
       <Card style={{ marginBottom: 20 }}>
         <Title level={4}>📊 Активность по дням недели</Title>
         <ResponsiveContainer width="100%" height={300}>
@@ -168,7 +158,6 @@ const Dashboard = () => {
         </ResponsiveContainer>
       </Card>
 
-      {/* 🧁 Pie Chart по ролям */}
       <Card>
         <Title level={4}>🧁 Роли пользователей</Title>
         <ResponsiveContainer width="100%" height={300}>
